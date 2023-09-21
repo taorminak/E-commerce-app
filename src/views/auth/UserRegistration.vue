@@ -488,7 +488,7 @@ import { useStore } from 'vuex';
 import HaveAnAccountForm from '@/components/auth/registration/HaveAnAccountForm.vue';
 import VCheckbox from '@/components/auth/registration/AddressCheckbox.vue';
 import VHeader from '@/components/auth/registration/HeaderSecondStep.vue';
-import VSetDefaultButtons from '@/components/auth/registration/VSetDefaultButtons.vue';
+import VSetDefaultButtons from '@/components/auth/registration/VSetDefaultButtonsAuth.vue';
 import vSelect from '@/components/auth/registration/SelectForm.vue';
 import { useVuelidate } from '@vuelidate/core';
 import { required, email, minLength } from '@vuelidate/validators';
@@ -750,6 +750,7 @@ async function submitHandler() {
       const res = await store.dispatch('customer/singUp', setShippingDataAsBilling());
 
       localStorage.setItem('isLoggedIn', JSON.stringify(true));
+      store.dispatch('cart/createCart');
       toast.success(`Welcome , ` + res.customer.firstName, {
         autoClose: 1000,
         theme: 'dark',

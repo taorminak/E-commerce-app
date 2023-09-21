@@ -3,6 +3,7 @@ import { ProductItem } from '@/types/interfaces/productItem';
 import { ActionContext } from 'vuex';
 import { createApiBuilderFromCtpClient } from '@commercetools/platform-sdk';
 import { ctpClient } from '@/utils/BuildClient';
+import { Commit } from 'vuex';
 
 const projectKey = process.env.VUE_APP_PRJ_KEY || 'defaultProjectKey';
 
@@ -36,6 +37,12 @@ export default {
       context.commit('incrementItemQuantity', cartItem);
     }
     context.commit('decrementProductInventory', product);
+  },
+  setSelectedProducts({ commit }: { commit: Commit }, products: ProductItem[]) {
+    commit('updateSelectedProducts', products);
+  },
+  updateSearchTerm({ commit }: { commit: Commit }, searchTerm: string) {
+    commit('updateSearchTerm', searchTerm);
   },
 };
 

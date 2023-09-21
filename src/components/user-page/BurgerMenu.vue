@@ -14,19 +14,11 @@
         <li class="user__item" :class="{ active: isActive === 'Account' }" @click="setProfileOptions('Account')">
           Account
         </li>
-        <li
-          class="user__item"
-          :class="{ active: isActive === 'Billing address' }"
-          @click="setProfileOptions('Billing address')"
-        >
-          Billing address
+        <li class="user__item" :class="{ active: isActive === 'Password' }" @click="setProfileOptions('Password')">
+          Password
         </li>
-        <li
-          class="user__item"
-          :class="{ active: isActive === 'Shipping address' }"
-          @click="setProfileOptions('Shipping address')"
-        >
-          Shipping address
+        <li class="user__item" :class="{ active: isActive === 'Address' }" @click="setProfileOptions('Address')">
+          Address
         </li>
       </ul>
     </div>

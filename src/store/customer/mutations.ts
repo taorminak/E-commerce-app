@@ -18,7 +18,7 @@ export default {
     state.currentUserId = '';
     state.currentUserFirstName = '';
     state.isLoggedIn = false;
-    localStorage.removeItem('isLoggedIn');
+    localStorage.clear();
   },
   setLoggedIn(state: CustomerState, payload: { isLoggedInValue: boolean; hasId: string }) {
     state.isLoggedIn = payload.isLoggedInValue;
@@ -35,7 +35,7 @@ export default {
 
     if (payload.body.defaultShippingAddressId)
       state.defaultAddresses.shippingId = payload.body.defaultShippingAddressId;
-    payload.body.addresses.forEach((obj, index) => {
+    payload.body.addresses.forEach((obj) => {
       const address = {
         streetName: obj.streetName,
         city: obj.city,
@@ -55,6 +55,6 @@ export default {
     state.user.address = state.user.address.filter((obj) => obj.id !== id);
   },
   addNewAddress(state: CustomerState, payload: IAddress) {
-    state.user.address.unshift(payload);
+    state.user.address.push(payload);
   },
 };

@@ -3,7 +3,7 @@
     <h2>Top 4</h2>
     <div class="top-games-row">
       <div v-for="game in topGames || []" :key="game.key">
-        <ProductCard :product="game" imageClass="top-four-image" />
+        <ProductCard :product="game" imageClass="top-four-image" @addToCartClicked="addToCart" />
       </div>
     </div>
   </div>
@@ -13,6 +13,8 @@
 import { ProductItem } from '@/types/interfaces/productItem';
 import ProductCard from '@/components/ProductCard.vue';
 import { defineComponent } from 'vue';
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
 export default defineComponent({
   components: {
@@ -39,6 +41,43 @@ export default defineComponent({
       }
 
       return shuffledArray;
+    },
+    async addToCart(product: ProductItem) {
+      try {
+        const updateCustomer = async () => {
+          if (!this.$store.state.cart.cartId) {
+            await this.$store.dispatch('cart/createAnonymousCart');
+          }
+
+          await this.$store.dispatch('cart/addLineItem', {
+            version: this.$store.state.cart.version,
+            actions: [
+              {
+                action: 'addLineItem',
+                productId: product.id,
+                variantId: product.masterVariant.id,
+                quantity: 1,
+              },
+            ],
+          });
+        };
+
+        toast.promise(
+          updateCustomer,
+          {
+            pending: 'Item is adding to the cart',
+            success: 'Item has added to the cart 👌',
+            error: 'Something goes wrong 🤯',
+          },
+          {
+            theme: 'dark',
+            icon: '🎉',
+            transition: toast.TRANSITIONS.SLIDE,
+          },
+        );
+      } catch (err) {
+        console.log(err);
+      }
     },
   },
 });

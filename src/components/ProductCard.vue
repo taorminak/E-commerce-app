@@ -1,48 +1,41 @@
 <template>
-  <router-link
-    class="promotion-card"
-    :key="product.id"
-    :to="`product:${product.slug['en-US']}`"
-    @mouseover="onMouseOver"
-    @mouseleave="onMouseLeave"
-  >
-    <img :src="getCoverImageUrl(product.masterVariant.images)" :alt="product.name['en-US']" :class="imageClass" />
+  <div class="promotion-card-wrapper" @mouseover="onMouseOver" @mouseleave="onMouseLeave">
+    <router-link class="promotion-card" :key="product.id" :to="`product:${product.slug['en-US']}`">
+      <div class="image-container">
+        <img :src="getCoverImageUrl(product.masterVariant.images)" :alt="product.name['en-US']" :class="imageClass" />
+      </div>
+      <div class="game-info" :class="gameInfo">
+        <div class="game-price-container">
+          <div class="game-price" :class="gamePrice">
+            {{ getProductPrice(product) }}
+          </div>
+          <div v-if="hasDiscountedPrice(product)" class="game-price-original">
+            {{ getOriginalPrice(product) }}
+          </div>
+          <div v-if="getProductDiscount(product) > 0" class="game-discount" :class="gameDiscount">
+            {{ getProductDiscount(product) }}% off
+          </div>
+        </div>
+        <div class="game-name">{{ product.name['en-US'] }}</div>
+        <button @click="toggleDescription" class="read-description-button" v-if="$route.name === 'catalog'">
+          Read Description
+        </button>
+      </div>
+      <div :class="{ overlay: true, show: showDescription }">
+        <div class="description-overlay">
+          <button @click="toggleDescription" class="close-description-button">Close</button>
+          <div class="game-description">{{ product.description['en-US'] }}</div>
+        </div>
+      </div>
+    </router-link>
     <div class="game-buttons" :class="{ 'show-buttons': showButtons }">
       <div class="game-add-to-cart" v-if="showButtons">
         <button @click="addToCart(product)" class="add-to-cart-button">
           <font-awesome-icon :icon="['fas', 'cart-shopping']" class="cart-icon"></font-awesome-icon>
         </button>
       </div>
-      <div class="game-add-to-fav" v-if="showButtons">
-        <button @click="addToFavourites(product)" class="add-to-fav-button">
-          <font-awesome-icon :icon="['fas', 'heart']" class="heart-icon" />
-        </button>
-      </div>
     </div>
-    <div class="game-info" :class="gameInfo">
-      <div class="game-price-container">
-        <div class="game-price" :class="gamePrice">
-          {{ getProductPrice(product) }}
-        </div>
-        <div v-if="hasDiscountedPrice(product)" class="game-price-original">
-          {{ getOriginalPrice(product) }}
-        </div>
-        <div v-if="getProductDiscount(product) > 0" class="game-discount" :class="gameDiscount">
-          {{ getProductDiscount(product) }}% off
-        </div>
-      </div>
-      <div class="game-name">{{ product.name['en-US'] }}</div>
-      <button @click="toggleDescription" class="read-description-button" v-if="$route.name === 'catalog'">
-        Read Description
-      </button>
-    </div>
-    <div :class="{ overlay: true, show: showDescription }">
-      <div class="description-overlay">
-        <button @click="toggleDescription" class="close-description-button">Close</button>
-        <div class="game-description">{{ product.description['en-US'] }}</div>
-      </div>
-    </div>
-  </router-link>
+  </div>
 </template>
 
 <script lang="ts">
@@ -133,9 +126,6 @@ export default defineComponent({
     addToCart(product: ProductItem) {
       this.$emit('addToCartClicked', product);
     },
-    addToFavourites(product: ProductItem) {
-      this.$emit('addToFavouritesClicked', product);
-    },
     onMouseOver() {
       this.showButtons = true;
     },
@@ -156,13 +146,15 @@ export default defineComponent({
 <style lang="scss">
 @import '@/assets/styles/global.scss';
 
+.promotion-card-wrapper {
+  position: relative;
+}
 .promotion-card {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   text-align: center;
-  position: relative;
   height: 100%;
   position: relative;
   transition: filter 0.3s ease;
@@ -275,9 +267,16 @@ export default defineComponent({
   text-align: left;
 }
 
+.image-container {
+  width: 100%;
+  max-width: 16.5rem;
+  max-height: 25rem;
+  overflow: hidden;
+}
+
 .image-mode {
-  max-width: 265px;
-  height: 400px;
+  width: 100%;
+  height: 25rem;
   border-radius: 15px;
   margin-bottom: 10px;
   object-fit: cover;
@@ -286,17 +285,16 @@ export default defineComponent({
 
 .image-mode-promo {
   object-fit: cover;
-  width: 500px;
-  max-width: 620px;
-  height: 319px;
+  width: 100%;
+  height: 20rem;
   border-radius: 15px;
   margin-bottom: 20px;
   cursor: pointer;
 }
 
 .top-four-image {
-  max-width: 270px;
-  height: 450px;
+  width: 100%;
+  height: 28rem;
   border-radius: 15px;
   margin-bottom: 10px;
   object-fit: cover;

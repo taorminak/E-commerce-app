@@ -44,7 +44,11 @@ export default defineComponent({
 });
 </script>
 
-<style>
+<style lang="scss">
+body {
+  overflow-x: hidden;
+}
+
 .home {
   display: flex;
   flex-direction: column;

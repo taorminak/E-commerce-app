@@ -37,8 +37,7 @@
           :class="{
             error:
               (v$.newPassword.$dirty && v$.newPassword.required.$invalid) ||
-              (v$.newPassword.$dirty && v$.newPassword.validatePassword.$invalid) ||
-              (v$.newPassword.$dirty && !v$.newPassword.isPasswordConfirmed.$invalid),
+              (v$.newPassword.$dirty && v$.newPassword.validatePassword.$invalid),
           }"
         />
       </label>
@@ -63,7 +62,8 @@
           :class="{
             error:
               (v$.confirmPassword.$dirty && v$.confirmPassword.required.$invalid) ||
-              (v$.confirmPassword.$dirty && v$.confirmPassword.validatePassword.$invalid),
+              (v$.confirmPassword.$dirty && v$.confirmPassword.validatePassword.$invalid) ||
+              (v$.confirmPassword.$dirty && v$.confirmPassword.sameAsPassword.$invalid),
           }"
         />
       </label>
@@ -75,6 +75,9 @@
           Password should contain minimum 8 characters, at least 1 uppercase letter, 1 lowercase letter, and 1 number.
         </div>
       </div>
+      <div class="input-errors" v-else-if="v$.confirmPassword.$dirty && v$.confirmPassword.sameAsPassword.$invalid">
+        <div class="error-msg">Passwords do not match</div>
+      </div>
     </div>
     <base-auth-button type>save</base-auth-button>
   </form>
@@ -83,7 +86,7 @@
 <script setup lang="ts">
 import { useVuelidate } from '@vuelidate/core';
 import { reactive, computed } from 'vue';
-import { required } from '@vuelidate/validators';
+import { required, sameAs } from '@vuelidate/validators';
 import { validatePassword } from '@/utils/auth/validator';
 import { useStore } from 'vuex';
 import { toast } from 'vue3-toastify';
@@ -99,13 +102,9 @@ const formData = reactive({
 const rules = computed(() => {
   return {
     currentPassword: { required, validatePassword },
-    newPassword: { required, validatePassword, isPasswordConfirmed },
-    confirmPassword: { required, validatePassword, isPasswordConfirmed },
+    newPassword: { required, validatePassword },
+    confirmPassword: { required, validatePassword, sameAsPassword: sameAs(formData.newPassword) },
   };
-});
-
-const isPasswordConfirmed = computed(() => {
-  return formData.newPassword === formData.confirmPassword;
 });
 
 const v$ = useVuelidate(rules, formData);
@@ -114,7 +113,7 @@ const v$ = useVuelidate(rules, formData);
 async function submitHandler() {
   const isFormCorrect = await v$.value.$validate();
 
-  if (isFormCorrect) return;
+  if (!isFormCorrect) return;
 
   try {
     const updateCustomer = async () => {

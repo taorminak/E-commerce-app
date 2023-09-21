@@ -4,6 +4,7 @@ import {
   // Import middlewares
   type AuthMiddlewareOptions, // Required for auth
   type HttpMiddlewareOptions, // Required for sending HTTP requests
+  type PasswordAuthMiddlewareOptions,
 } from '@commercetools/sdk-client-v2';
 
 const projectKey = `${process.env.VUE_APP_PRJ_KEY}`;
@@ -29,8 +30,39 @@ const httpMiddlewareOptions: HttpMiddlewareOptions = {
 
 // Export the ClientBuilder
 export const ctpClient = new ClientBuilder()
-  .withProjectKey(projectKey)
-  .withHttpMiddleware(httpMiddlewareOptions)
-  .withLoggerMiddleware() // Include middleware for logging
   .withClientCredentialsFlow(authMiddlewareOptions)
+  .withHttpMiddleware(httpMiddlewareOptions)
+  // .withProjectKey(projectKey)
+  // .withLoggerMiddleware() // Include middleware for logging
+  .build();
+
+export const ctpAnonymousClient = new ClientBuilder()
+  .withAnonymousSessionFlow(authMiddlewareOptions)
+  .withHttpMiddleware(httpMiddlewareOptions)
+  // .withProjectKey(projectKey)
+  // .withLoggerMiddleware() // Include middleware for logging
+  .build();
+
+const storedEmail = localStorage.getItem('email');
+const storedPassword = localStorage.getItem('password');
+//const scope = [`manage_my_orders:${projectKey}`, `manage_my_shopping_lists:${projectKey}`];
+
+const passwordAuthMiddlewareOptions: PasswordAuthMiddlewareOptions = {
+  host: 'https://auth.australia-southeast1.gcp.commercetools.com',
+  projectKey: projectKey,
+  credentials: {
+    clientId: `${process.env.VUE_APP_CLI_ID}`,
+    clientSecret: `${process.env.VUE_APP_CLI_SCR}`,
+    user: {
+      username: `${storedEmail}`,
+      password: `${storedPassword}`,
+    },
+  },
+  scopes,
+  fetch,
+};
+
+export const authClient = new ClientBuilder()
+  .withPasswordFlow(passwordAuthMiddlewareOptions)
+  .withHttpMiddleware(httpMiddlewareOptions)
   .build();

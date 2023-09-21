@@ -73,7 +73,6 @@ const requirements = currentProd.masterVariant.attributes.find((att) => att.name
 
 function openModalWindow(imgId: number) {
   imgArrFilter.sort((img) => (img.id === imgId ? -1 : +1));
-  console.log(imgArrFilter);
   isModalImg.value = true;
 }
 

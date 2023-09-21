@@ -189,9 +189,9 @@ function setCountry(option: Country) {
 }
 // eslint-disable-next-line max-lines-per-function
 async function submitHandler() {
-  // const isFormCorrect = await v$.value.$validate();
+  const isFormCorrect = await v$.value.$validate();
 
-  // if (!isFormCorrect) return;
+  if (!isFormCorrect) return;
 
   const formData = {
     version: address.version,
@@ -220,7 +220,7 @@ async function submitHandler() {
         phone: address.phone.number,
         city: address.city,
         streetName: address.streetName,
-        id: res.id,
+        id: res.body.addresses[res.body.addresses.length - 1].id,
       });
     };
 

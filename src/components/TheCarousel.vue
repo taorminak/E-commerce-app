@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="carousel-container">
     <Carousel
       :items-to-show="carouselItemsToShow"
       :items-to-scroll="1"
@@ -51,12 +51,15 @@ const slides = [
 
 const currentSlide = ref(0);
 const carouselItemsToShow = ref(1);
+const showGameInfo = ref(true);
 
 const handleResize = () => {
   if (window.innerWidth > 768) {
     carouselItemsToShow.value = 1.5;
+    showGameInfo.value = true;
   } else {
     carouselItemsToShow.value = 1;
+    showGameInfo.value = false;
   }
 };
 
@@ -70,17 +73,21 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize);
 });
 
-const showGameInfo = computed(() => {
-  return window.innerWidth > 768;
-});
-
 const showNavigation = computed(() => {
   return window.innerWidth > 768;
 });
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 @import '@/assets/styles/global.scss';
+
+body {
+  overflow-x: hidden;
+}
+
+.carousel-container {
+  position: relative;
+}
 
 .carousel {
   margin-top: 35px;
@@ -169,11 +176,12 @@ const showNavigation = computed(() => {
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
-  width: 592px;
-  height: 394px;
+  max-width: 592px;
+  max-height: 394px;
   position: absolute;
-  top: 420px;
-  left: 350px;
+  top: 65%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   background-color: rgba(0, 0, 0, 0.3);
   border-radius: 5%;
   padding: 20px;

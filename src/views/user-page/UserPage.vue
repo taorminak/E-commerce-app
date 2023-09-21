@@ -30,8 +30,8 @@
             </base-card>
           </transition>
           <transition-group>
-            <base-card class="user__info" v-for="address in getUser.address" :key="address.id">
-              <AddressCard :address="address" :version="getVersion" :defaultAddresses="defaultAddresses" />
+            <base-card class="user__info" v-for="address in getAddresses" :key="address.id">
+              <AddressCard :address="address" :defaultAddresses="defaultAddresses" />
             </base-card>
           </transition-group>
         </div>
@@ -58,8 +58,9 @@ import { useStore } from 'vuex';
 const store = useStore();
 let profileHeader = ref('Account');
 const isLoading = ref(false);
-const getUser = computed(() => store.getters['customer/getUser']);
-const getVersion = computed(() => store.getters['customer/getVersion']);
+const getAddresses = computed(() => {
+  return store.getters['customer/getAddresses'];
+});
 const isNewAddress = ref(false);
 const defaultAddresses = computed(() => {
   return store.getters['customer/getDefaultAddresses'];
@@ -67,6 +68,10 @@ const defaultAddresses = computed(() => {
 
 function setProfileOption(option: string) {
   profileHeader.value = option;
+
+  if (option === 'Address') {
+    getCustomerData();
+  }
 }
 
 async function getCustomerData() {

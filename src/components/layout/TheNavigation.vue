@@ -83,12 +83,14 @@
           class="search-input input"
           list="productSuggestions"
           @input="searchProducts"
+          @keyup.enter="handleSearch"
         />
         <font-awesome-icon :icon="['fas', 'search']" class="search-icon" @click="handleSearch"></font-awesome-icon>
         <datalist id="productSuggestions">
           <option v-for="(product, index) in productSuggestions" :value="product" :key="index">{{ product }}</option>
         </datalist>
       </div>
+
       <div>
         <router-link
           v-if="!isLoggedIn"
@@ -127,15 +129,18 @@
         </div>
 
         |
-        <router-link
-          :to="{ name: 'cart' }"
-          class="nav-link cart-link"
-          :class="{ active: activeLink === 'cart' }"
-          data-type="cart"
-          @click="setActiveLink('cart')"
-        >
-          <font-awesome-icon :icon="['fas', 'cart-shopping']"></font-awesome-icon>
-        </router-link>
+        <div class="cart-link-wrapper">
+          <router-link
+            :to="{ name: 'cart' }"
+            class="nav-link cart-link"
+            :class="{ active: activeLink === 'cart' }"
+            data-type="cart"
+            @click="setActiveLink('cart')"
+          >
+            <font-awesome-icon :icon="['fas', 'cart-shopping']"></font-awesome-icon>
+          </router-link>
+          <span class="cart-link-amount">{{ getCartQuantity }}</span>
+        </div>
       </div>
     </nav>
   </header>
@@ -156,8 +161,10 @@ export default defineComponent({
       activeLink: '',
       showMenu: false,
       productSuggestions: [] as string[],
+      selectedProducts: [],
     };
   },
+
   methods: {
     setActiveLink(linkType: string) {
       this.activeLink = linkType;
@@ -192,22 +199,37 @@ export default defineComponent({
       });
 
       this.productSuggestions = filteredProducts.map((product: ProductItem) => product.name['en-US']);
-
-      if (this.$route.name === 'catalog') {
-        this.$store.commit('setProducts', filteredProducts);
-      }
     },
     handleSearch() {
-      if (this.$route.name === 'catalog') {
-        this.searchProducts();
+      if (this.searchTerm) {
+        const selectedProducts = this.findSelectedProducts();
 
-        this.searchTerm = '';
+        this.$store.dispatch('setSelectedProducts', selectedProducts);
+      } else {
+        this.$store.dispatch('setSelectedProducts', []);
       }
+      this.$store.dispatch('updateSearchTerm', this.searchTerm);
+    },
+
+    findSelectedProducts() {
+      const searchTerm = this.searchTerm.toLowerCase();
+      const products = this.$store.state.products.products || [];
+
+      const filteredProducts = products.filter((product: ProductItem) => {
+        const productName = product.name['en-US'].toLowerCase();
+
+        return productName.includes(searchTerm);
+      });
+
+      return filteredProducts;
     },
   },
   computed: {
     isLoggedIn() {
       return this.$store.getters['customer/getIsLoggedIn'];
+    },
+    getCartQuantity() {
+      return this.$store.getters['cart/getCartQuantity'];
     },
   },
 });
@@ -320,22 +342,42 @@ nav .nav-link:hover {
   color: #a0a0a0;
 }
 
+.nav-link {
+  transition: 0.2s;
+}
+
 .cart-link {
+  position: relative;
   display: inline-block;
   vertical-align: middle;
   margin-right: 10px;
   color: $white-color;
 
-  &:hover {
-    color: #808080;
+  & img {
+    height: 25px;
   }
 
   &:active {
     color: #a0a0a0;
   }
 }
-.cart-link img {
-  height: 25px;
+.cart-link-amount {
+  position: absolute;
+  top: -2px;
+  right: 3px;
+  background: orange;
+  border-radius: 50%;
+  width: 13px;
+  height: 13px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+.cart-link-wrapper {
+  position: relative;
+  display: inline;
 }
 .logo-link {
   display: flex;

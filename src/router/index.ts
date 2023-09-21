@@ -11,6 +11,11 @@ const routes: Array<RouteRecordRaw> = [
         redirect: 'home',
       },
       {
+        path: 'profile-settings',
+        name: 'userProfile',
+        component: () => import('@/views/user-page/UserPage.vue'),
+      },
+      {
         path: 'home',
         name: 'home',
         component: () => import('@/views/HomeView.vue'),
@@ -37,11 +42,6 @@ const routes: Array<RouteRecordRaw> = [
         props: true,
       },
     ],
-  },
-  {
-    path: '/profile-settings',
-    name: 'userProfile',
-    component: () => import('@/views/user-page/UserPage.vue'),
   },
   {
     path: '/login',

@@ -20,6 +20,8 @@ const productsModule: Module<ProductsState, GlobalState> = {
       ActionAdventure: { value: '5402faca-17a1-4830-b92c-292c16d1568d', selected: true },
       Other: { value: 'missing', selected: true },
     },
+    selectedProducts: [],
+    searchTerm: '',
   },
   mutations,
   actions,

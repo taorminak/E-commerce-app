@@ -19,6 +19,14 @@ export interface CustomerState {
   };
 }
 
+export interface CartState {
+  cart: CartItem[];
+  cartId: string;
+  version: number;
+  totalPrice: number;
+  totalLineItemQuantity: number;
+}
+
 export interface IAddress {
   streetName: string;
   city: string;
@@ -31,6 +39,7 @@ export interface IAddress {
 export interface GlobalState {
   customer: CustomerState;
   products: ProductsState;
+  cart: CartState;
 }
 
 export interface ProductsState {
@@ -43,4 +52,6 @@ export interface ProductsState {
       selected: boolean;
     };
   };
+  selectedProducts: [];
+  searchTerm: '';
 }

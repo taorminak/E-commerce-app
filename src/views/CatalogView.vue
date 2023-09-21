@@ -22,26 +22,220 @@
         </div>
         <div class="product-cards">
           <div class="product-card-container" v-if="loading">
-            <ProductCard
-              v-for="product in displayedGames || []"
-              :key="product.id"
-              :product="product"
-              imageClass="image-mode"
-              class="product-card"
-            />
+            <template v-if="searchTerm && selectedProducts && Object.keys(selectedProducts).length > 0">
+              <ProductCard
+                v-for="product in selectedProducts"
+                :key="product.key"
+                :product="product"
+                imageClass="image-mode"
+                class="product-card"
+                @addToCartClicked="addItemToCart"
+              />
+            </template>
+
+            <template v-else-if="searchTerm && Object.keys(selectedProducts).length === 0">
+              <div class="not-found">Not Found</div>
+            </template>
+
+            <template v-if="searchTerm.trim() === ''">
+              <ProductCard
+                v-for="product in allProducts || []"
+                :key="product.key"
+                :product="product"
+                imageClass="image-mode"
+                class="product-card"
+                @addToCartClicked="addItemToCart"
+              />
+            </template>
           </div>
           <base-spinner title="loading" v-else class="spinner-style"></base-spinner>
+          <div class="pagination-buttons_container" v-if="shouldShowPagination">
+            <button
+              @click="goToPage(currentPage - 1)"
+              :disabled="currentPage === 1"
+              class="previous_button"
+              :class="{ disabled: currentPage === 1 }"
+            >
+              Previous
+            </button>
+            <span class="current_page">{{ currentPage }}</span>
+            <button
+              @click="goToPage(currentPage + 1)"
+              :disabled="currentPage === totalPages"
+              class="next_button"
+              :class="{ disabled: currentPage === totalPages }"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted, ref, watch } from 'vue';
-import { ProductItem } from '@/types/interfaces/productItem';
-import ProductCard from '@/components/ProductCard.vue';
+<script setup lang="ts">
+import { ref, onMounted, watch, computed } from 'vue';
 import { useStore } from 'vuex';
+import { ProductItem } from '@/types/interfaces/productItem';
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
+
+const store = useStore();
+const loading = ref(false);
+const displayedGames = ref<ProductItem[]>([]);
+const allProducts = ref<ProductItem[]>([]);
+const currentPage = ref(1);
+const itemsPerPage = 9;
+let totalPages = 1;
+
+const fetchProducts = async () => {
+  const priceRange = store.state.products.priceRange;
+
+  await store.dispatch('fetchProducts', priceRange);
+  loading.value = true;
+  displayedGames.value = store.state.products.products || [];
+  allProducts.value = displayedGames.value;
+
+  totalPages = Math.ceil(displayedGames.value.length / itemsPerPage);
+
+  fetchDataForPage(currentPage.value);
+};
+
+const goToPage = (page: number) => {
+  if (page >= 1 && page <= totalPages) {
+    currentPage.value = page;
+    fetchDataForPage(page);
+  }
+};
+
+const fetchDataForPage = (page: number) => {
+  const start = (page - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+
+  allProducts.value = displayedGames.value.slice(start, end);
+};
+
+async function createCartIfNotExists() {
+  await store.dispatch('cart/createCart');
+}
+
+async function addProductToCart(product: ProductItem) {
+  await store.dispatch('cart/addLineItem', {
+    version: store.state.cart.version,
+    actions: [
+      {
+        action: 'addLineItem',
+        productId: product.id,
+        variantId: product.masterVariant.id,
+        quantity: 1,
+      },
+    ],
+  });
+}
+
+// Основная функция для добавления товара в корзину
+const addItemToCart = async (product: ProductItem) => {
+  try {
+    if (!store.state.cart.cartId) {
+      await createCartIfNotExists();
+    }
+
+    await addProductToCart(product);
+
+    toast.success('Item has been added to the cart 👌', {
+      theme: 'dark',
+      icon: '🎉',
+      transition: toast.TRANSITIONS.SLIDE,
+    });
+  } catch (err) {
+    console.error('Error adding the product to the cart:', err);
+    toast.error('Something went wrong 🤯', {
+      theme: 'dark',
+      icon: '❌',
+      transition: toast.TRANSITIONS.SLIDE,
+    });
+  }
+};
+
+const shouldShowPagination = computed(() => {
+  if (store.getters.getSearchTerm.trim() === '') {
+    return true;
+  }
+
+  if (store.getters.selectedProducts && store.getters.selectedProducts.length > 0) {
+    return true;
+  }
+
+  return false;
+});
+
+watch(
+  () => store.state.products.priceRange,
+  (newPriceRange) => {
+    store.dispatch('fetchProducts', newPriceRange);
+
+    allProducts.value = displayedGames.value;
+    fetchDataForPage(currentPage.value);
+  },
+  { immediate: true },
+);
+
+watch(
+  () => store.state.products.products,
+  (newProducts) => {
+    displayedGames.value = newProducts || [];
+    totalPages = Math.ceil(displayedGames.value.length / itemsPerPage);
+    allProducts.value = displayedGames.value;
+    fetchDataForPage(currentPage.value);
+  },
+  { immediate: true },
+);
+
+watch(
+  () => store.state.products.selectedCategories,
+  (newSelectedCategories) => {
+    store.dispatch('fetchProducts', newSelectedCategories);
+
+    allProducts.value = displayedGames.value;
+    fetchDataForPage(currentPage.value);
+  },
+  { deep: true, immediate: true },
+);
+watch(
+  () => displayedGames.value,
+  (newDisplayedGames) => {
+    const startIndex = (currentPage.value - 1) * itemsPerPage;
+
+    if (startIndex >= newDisplayedGames.length) {
+      currentPage.value = Math.max(Math.ceil(newDisplayedGames.length / itemsPerPage), 1);
+    }
+    totalPages = Math.ceil(newDisplayedGames.length / itemsPerPage);
+  },
+  { immediate: true },
+);
+watch(
+  () => store.getters.selectedProducts,
+  () => {
+    currentPage.value = 1;
+
+    const foundProductCount = store.getters.selectedProducts?.length || 0;
+
+    totalPages = Math.ceil(foundProductCount / itemsPerPage);
+  },
+  { immediate: true },
+);
+
+onMounted(() => {
+  fetchProducts();
+});
+</script>
+
+<script lang="ts">
+import { defineComponent } from 'vue';
+
+import ProductCard from '@/components/ProductCard.vue';
+
 import FilterBar from '@/components/FilterBar.vue';
 
 export default defineComponent({
@@ -51,50 +245,19 @@ export default defineComponent({
       selectedOption: 'Sort by higher price',
     };
   },
+  computed: {
+    selectedProducts() {
+      return this.$store.getters.selectedProducts;
+    },
+    searchTerm() {
+      return this.$store.getters.getSearchTerm;
+    },
+  },
   components: {
     ProductCard,
     FilterBar,
   },
-  setup() {
-    const store = useStore();
-    const loading = ref(false);
-    const displayedGames = ref<ProductItem[]>([]);
 
-    const priceRange = store.state.products.priceRange;
-
-    onMounted(async () => {
-      await store.dispatch('fetchProducts', priceRange);
-      loading.value = true;
-      displayedGames.value = store.state.products.products || [];
-    });
-
-    watch(
-      () => store.state.products.priceRange,
-      (newPriceRange) => {
-        store.dispatch('fetchProducts', newPriceRange);
-      },
-      { immediate: true },
-    );
-    watch(
-      () => store.state.products.products,
-      (newProducts) => {
-        displayedGames.value = newProducts || [];
-      },
-      { immediate: true },
-    );
-    watch(
-      () => store.state.products.selectedCategories,
-      (newSelectedCategories) => {
-        store.dispatch('fetchProducts', newSelectedCategories);
-      },
-      { deep: true, immediate: true },
-    );
-
-    return {
-      loading,
-      displayedGames,
-    };
-  },
   methods: {
     toggleDropdown() {
       this.isDropdownOpen = !this.isDropdownOpen;
@@ -160,6 +323,54 @@ export default defineComponent({
 
 <style scoped lang="scss">
 @import '@/assets/styles/global.scss';
+
+body {
+  overflow-x: hidden;
+
+  .pagination-buttons_container {
+    margin-top: 80px;
+  }
+
+  .previous_button,
+  .next_button {
+    background-color: rgba(119, 190, 29, 1);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin: 0 5px;
+    width: 100px;
+
+    &:hover {
+      background-color: #45a049;
+    }
+  }
+
+  .disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .current_page {
+    margin: 0 10px;
+    font-size: 16px;
+    color: white;
+  }
+}
+
+.not-found {
+  color: $white-color;
+  font-family: 'Roboto', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 47px;
+  letter-spacing: 0em;
+  text-align: left;
+  margin: 0;
+}
 
 .dropdown-list li {
   padding: 8px 16px;
@@ -273,10 +484,14 @@ export default defineComponent({
         }
       }
 
+      .product-cards {
+        width: 60vw;
+      }
       .product-card-container {
+        width: 60vw;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 30px;
+        gap: 5px;
         margin: auto;
         margin-top: 45px;
 

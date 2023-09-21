@@ -23,14 +23,9 @@
                 placeholder="Your street"
                 v-model="address.streetName"
                 @input="v$.streetName.$validate"
-                :disabled="!isStreetEdit"
-                :class="{ disabled: !isStreetEdit, error: v$.streetName.$dirty && v$.streetName.required.$invalid }"
+                :disabled="!isAddressEdit"
+                :class="{ disabled: !isAddressEdit, error: v$.streetName.$dirty && v$.streetName.required.$invalid }"
               />
-              <font-awesome-icon v-if="!isStreetEdit" @click="isStreetEdit = !isStreetEdit" icon="pen-to-square" />
-              <div class="form-item" v-else>
-                <font-awesome-icon @click="setStreetName($event, 'cancel')" icon="fa-solid fa-xmark" />
-                <font-awesome-icon @click="setStreetName($event, 'submit')" icon="fa-solid fa-check" />
-              </div>
             </div>
             <div class="input-errors" v-if="v$.streetName.$dirty && v$.streetName.required.$invalid">
               <div class="error-msg">Must contain at least one character</div>
@@ -47,14 +42,9 @@
                 placeholder="Your city"
                 v-model="address.city"
                 @input="v$.city.$validate"
-                :disabled="!isCityEdit"
-                :class="{ disabled: !isCityEdit, error: v$.city.$dirty && v$.city.validateCity.$invalid }"
+                :disabled="!isAddressEdit"
+                :class="{ disabled: !isAddressEdit, error: v$.city.$dirty && v$.city.validateCity.$invalid }"
               />
-              <font-awesome-icon v-if="!isCityEdit" @click="isCityEdit = !isCityEdit" icon="pen-to-square" />
-              <div class="form-item" v-else>
-                <font-awesome-icon @click="setCity($event, 'cancel')" icon="fa-solid fa-xmark" />
-                <font-awesome-icon @click="setCity($event, 'submit')" icon="fa-solid fa-check" />
-              </div>
             </div>
             <div class="input-errors" v-if="v$.city.$dirty && v$.city.validateCity.$invalid">
               <div class="error-msg">Must contain at least one character and no special characters or numbers</div>
@@ -71,14 +61,9 @@
             :selected="selectedCountry"
             v-model="address.country"
             @select="setCountry"
-            :disabled="!isSelectEdit"
-            :class="{ disabled: !isSelectEdit, error: v$.country.$dirty && v$.country.required.$invalid }"
+            :disabled="!isAddressEdit"
+            :class="{ disabled: !isAddressEdit, error: v$.country.$dirty && v$.country.required.$invalid }"
           />
-          <font-awesome-icon v-if="!isSelectEdit" @click="isSelectEdit = !isSelectEdit" icon="pen-to-square" />
-          <div class="form-item" v-else>
-            <font-awesome-icon @click="setCountryToData($event, 'cancel')" icon="fa-solid fa-xmark" />
-            <font-awesome-icon @click="setCountryToData($event, 'submit')" icon="fa-solid fa-check" />
-          </div>
         </div>
         <div class="input-errors" v-if="v$.country.$dirty && v$.country.required.$invalid">
           <div class="error-msg">Must be a valid country from a predefined list</div>
@@ -96,29 +81,20 @@
             :maxlength="v$.phone.number.minLength.$params.min"
             @input="v$.phone.number.$validate"
             v-model="address.phone.number"
-            :disabled="!isPhoneEdit"
+            :disabled="!isAddressEdit"
             :class="{
-              disabled: !isPhoneEdit,
+              disabled: !isAddressEdit,
               error:
                 (v$.phone.number.$dirty && v$.phone.number.required.$invalid) ||
-                (v$.phone.number.$dirty && v$.phone.number.minLength.$invalid) ||
-                v$.phone.number.isCountryMatchPhoneNumber.$invalid,
+                (v$.phone.number.$dirty && v$.phone.number.minLength.$invalid),
             }"
           />
-          <font-awesome-icon v-if="!isPhoneEdit" @click="isPhoneEdit = !isPhoneEdit" icon="pen-to-square" />
-          <div class="form-item" v-else>
-            <font-awesome-icon @click="setPhone($event, 'cancel')" icon="fa-solid fa-xmark" />
-            <font-awesome-icon @click="setPhone($event, 'submit')" icon="fa-solid fa-check" />
-          </div>
         </div>
         <div class="input-errors" v-if="v$.phone.number.$dirty && v$.phone.number.required.$invalid">
           <div class="error-msg">Enter your phone number</div>
         </div>
         <div class="input-errors" v-else-if="v$.phone.number.$dirty && v$.phone.number.minLength.$invalid">
           <div class="error-msg">Enter a valid phone number</div>
-        </div>
-        <div class="input-errors" v-else-if="v$.phone.number.isCountryMatchPhoneNumber.$invalid">
-          <div class="error-msg">Incorrect number. It doesn't match your country</div>
         </div>
       </div>
       <label for="postalCode">Postal code</label>
@@ -130,23 +106,14 @@
             :placeholder="placeholders.postalCodePlaceholder"
             v-model="address.postalCode"
             @input="v$.postalCode.$validate"
-            :disabled="!isPostalCodeEdit"
+            :disabled="!isAddressEdit"
             :class="{
-              disabled: !isPostalCodeEdit,
+              disabled: !isAddressEdit,
               error:
                 (v$.postalCode.$dirty && v$.postalCode.required.$invalid) ||
                 (v$.postalCode.$dirty && v$.postalCode.validatePostalCode.$invalid),
             }"
           />
-          <font-awesome-icon
-            v-if="!isPostalCodeEdit"
-            @click="isPostalCodeEdit = !isPostalCodeEdit"
-            icon="pen-to-square"
-          />
-          <div class="form-item" v-else>
-            <font-awesome-icon @click="setPostalCode($event, 'cancel')" icon="fa-solid fa-xmark" />
-            <font-awesome-icon @click="setPostalCode($event, 'submit')" icon="fa-solid fa-check" />
-          </div>
         </div>
         <div class="input-errors" v-if="v$.postalCode.$dirty && v$.postalCode.required.$invalid">
           <div class="error-msg">Enter your postal code</div>
@@ -161,9 +128,15 @@
         shippingAddress="Set as default shipping address"
         billingAddress="Set as default billing address"
         :addressId="address.id"
-        :version="version"
         mode="inputAddress"
       />
+    </div>
+    <div class="address-block" v-if="!isAddressEdit">
+      <base-auth-button class="address-button" @click="isAddressEdit = !isAddressEdit">Change address</base-auth-button>
+    </div>
+    <div class="address-block" v-else>
+      <base-auth-button class="address-button" @click="setAddress('cancel')">Cancel</base-auth-button>
+      <base-auth-button class="address-button" type @click="setAddress('submit')">Save</base-auth-button>
     </div>
   </div>
 </template>
@@ -183,23 +156,19 @@ import { DataFormAddress } from '@/types/auth/RegisterData';
 
 const props = defineProps<{
   address: DataFormAddress;
-  version: number;
   defaultAddresses: {
     billingId: string;
     shippingId: string;
   };
 }>();
 
+const getVersion = computed(() => store.getters['customer/getVersion']);
 const store = useStore();
 const countries = ref([
   { title: 'RU', value: 'Russian Federation' },
   { title: 'US', value: 'The United States' },
 ]);
-const isSelectEdit = ref(false);
-const isCityEdit = ref(false);
-const isPostalCodeEdit = ref(false);
-const isPhoneEdit = ref(false);
-const isStreetEdit = ref(false);
+const isAddressEdit = ref(false);
 const address = reactive({
   streetName: props.address.streetName,
   city: props.address.city,
@@ -209,7 +178,7 @@ const address = reactive({
   },
   postalCode: props.address.postalCode,
   country: props.address.country,
-  version: props.version,
+  version: getVersion,
   id: props.address.id,
 });
 const rules = computed(() => {
@@ -218,7 +187,7 @@ const rules = computed(() => {
     city: { validateCity },
     streetName: { required },
     postalCode: { required, validatePostalCode },
-    phone: { number: { required, minLength: minLength(17), isCountryMatchPhoneNumber } },
+    phone: { number: { required, minLength: minLength(17) } },
   };
 });
 const placeholders = reactive({
@@ -241,15 +210,9 @@ watch(selectedCountry, (newValue) => {
 watch(
   () => address.phone.number,
   (newValue) => {
-    if (isCountryMatchPhoneNumber()) {
-      address.phone.number = formatPhoneNumber(newValue, selectedCountry.value.title);
-    }
+    address.phone.number = formatPhoneNumber(newValue, selectedCountry.value.title);
   },
 );
-
-function isCountryMatchPhoneNumber() {
-  return address.phone.code === address.country;
-}
 
 function validatePostalCode(postalCode: string) {
   if (selectedCountry.value.title.toUpperCase() === 'RU') {
@@ -262,15 +225,16 @@ function validatePostalCode(postalCode: string) {
 }
 function setCountry(option: Country) {
   selectedCountry.value = option;
+  address.phone.number = '';
+  address.postalCode = '';
 }
+
 // eslint-disable-next-line max-lines-per-function
-async function setCountryToData(event: Event, mode: string) {
+async function setAddress(mode: string) {
   if (mode === 'submit') {
     const isFormCorrect = await v$.value.$validate();
 
     if (!isFormCorrect) return;
-
-    isSelectEdit.value = !isSelectEdit.value;
 
     const formData = {
       version: address.version,
@@ -280,73 +244,10 @@ async function setCountryToData(event: Event, mode: string) {
           addressId: address.id,
           address: {
             country: selectedCountry.value?.title,
+            phone: address.phone.number,
+            city: address.city,
+            postalCode: address.postalCode,
             streetName: address.streetName,
-            phone: address.phone.number,
-            city: address.city,
-            postalCode: address.postalCode,
-          },
-        },
-      ],
-    };
-
-    address.phone.code = selectedCountry.value?.title;
-
-    try {
-      const updateCustomer = async () => {
-        const res = await store.dispatch('customer/updateCustomer', formData);
-
-        store.commit('customer/setVersion', res.body.version);
-      };
-
-      toast.promise(
-        updateCustomer,
-        {
-          pending: 'Country is updating',
-          success: 'Country has updated 👌',
-          error: 'Something goes wrong 🤯',
-        },
-        {
-          theme: 'dark',
-          icon: '🎉',
-          transition: toast.TRANSITIONS.SLIDE,
-        },
-      );
-    } catch (error) {
-      console.log(error);
-    }
-  } else if (mode === 'cancel') {
-    isSelectEdit.value = !isSelectEdit.value;
-
-    selectedCountry.value = countries.value.find((obj) => obj.title === props.address.country) || {
-      title: '',
-      value: 'Select country',
-    };
-  }
-}
-// eslint-disable-next-line max-lines-per-function
-async function setStreetName(event: Event, mode: string) {
-  if (mode === 'submit') {
-    const isFormCorrect = await v$.value.$validate();
-
-    if (!isFormCorrect) return;
-    isStreetEdit.value = !isStreetEdit.value;
-
-    const parentElem = event.currentTarget as HTMLElement;
-
-    const input = parentElem.parentElement?.parentElement?.firstChild as HTMLInputElement;
-
-    const formData = {
-      version: address.version,
-      actions: [
-        {
-          action: 'changeAddress',
-          addressId: address.id,
-          address: {
-            country: selectedCountry.value?.title,
-            streetName: input.value,
-            phone: address.phone.number,
-            city: address.city,
-            postalCode: address.postalCode,
           },
         },
       ],
@@ -359,11 +260,13 @@ async function setStreetName(event: Event, mode: string) {
         store.commit('customer/setVersion', res.body.version);
       };
 
+      isAddressEdit.value = !isAddressEdit.value;
+
       toast.promise(
         updateCustomer,
         {
-          pending: 'Street name is updating',
-          success: 'Street name has updated 👌',
+          pending: 'Address is updating',
+          success: 'Address has updated 👌',
           error: 'Something goes wrong 🤯',
         },
         {
@@ -376,183 +279,13 @@ async function setStreetName(event: Event, mode: string) {
       console.log(error);
     }
   } else if (mode === 'cancel') {
-    isStreetEdit.value = !isStreetEdit.value;
-
+    isAddressEdit.value = !isAddressEdit.value;
     address.streetName = props.address.streetName;
-  }
-}
-// eslint-disable-next-line max-lines-per-function
-async function setCity(event: Event, mode: string) {
-  if (mode === 'submit') {
-    const isFormCorrect = await v$.value.$validate();
-
-    if (!isFormCorrect) return;
-    isCityEdit.value = !isCityEdit.value;
-
-    const parentElem = event.currentTarget as HTMLElement;
-
-    const input = parentElem.parentElement?.parentElement?.firstChild as HTMLInputElement;
-
-    const formData = {
-      version: address.version,
-      actions: [
-        {
-          action: 'changeAddress',
-          addressId: address.id,
-          address: {
-            country: selectedCountry.value?.title,
-            city: input.value,
-            postalCode: address.postalCode,
-            phone: address.phone.number,
-            streetName: address.streetName,
-          },
-        },
-      ],
-    };
-
-    try {
-      const updateCustomer = async () => {
-        const res = await store.dispatch('customer/updateCustomer', formData);
-
-        store.commit('customer/setVersion', res.body.version);
-      };
-
-      toast.promise(
-        updateCustomer,
-        {
-          pending: 'City is updating',
-          success: 'City has updated 👌',
-          error: 'Something goes wrong 🤯',
-        },
-        {
-          theme: 'dark',
-          icon: '🎉',
-          transition: toast.TRANSITIONS.SLIDE,
-        },
-      );
-    } catch (error) {
-      console.log(error);
-    }
-  } else if (mode === 'cancel') {
-    isCityEdit.value = !isCityEdit.value;
-
     address.city = props.address.city;
-  }
-}
-// eslint-disable-next-line max-lines-per-function
-async function setPostalCode(event: Event, mode: string) {
-  if (mode === 'submit') {
-    const isFormCorrect = await v$.value.$validate();
-
-    if (!isFormCorrect) return;
-    isPostalCodeEdit.value = !isPostalCodeEdit.value;
-
-    const parentElem = event.currentTarget as HTMLElement;
-
-    const input = parentElem.parentElement?.parentElement?.firstChild as HTMLInputElement;
-
-    const formData = {
-      version: address.version,
-      actions: [
-        {
-          action: 'changeAddress',
-          addressId: address.id,
-          address: {
-            country: selectedCountry.value?.title,
-            postalCode: input.value,
-            phone: address.phone.number,
-            city: address.city,
-            streetName: address.streetName,
-          },
-        },
-      ],
-    };
-
-    try {
-      const updateCustomer = async () => {
-        const res = await store.dispatch('customer/updateCustomer', formData);
-
-        store.commit('customer/setVersion', res.body.version);
-      };
-
-      toast.promise(
-        updateCustomer,
-        {
-          pending: 'Postal code is updating',
-          success: 'Postal code has updated 👌',
-          error: 'Something goes wrong 🤯',
-        },
-        {
-          theme: 'dark',
-          icon: '🎉',
-          transition: toast.TRANSITIONS.SLIDE,
-        },
-      );
-    } catch (error) {
-      console.log(error);
-    }
-  } else if (mode === 'cancel') {
-    isPostalCodeEdit.value = !isPostalCodeEdit.value;
-
-    address.postalCode = props.address.postalCode;
-  }
-}
-// eslint-disable-next-line max-lines-per-function
-async function setPhone(event: Event, mode: string) {
-  if (mode === 'submit') {
-    const isFormCorrect = await v$.value.$validate();
-
-    if (!isFormCorrect) return;
-    isPhoneEdit.value = !isPhoneEdit.value;
-
-    const parentElem = event.currentTarget as HTMLElement;
-
-    const input = parentElem.parentElement?.parentElement?.firstChild as HTMLInputElement;
-
-    const formData = {
-      version: address.version,
-      actions: [
-        {
-          action: 'changeAddress',
-          addressId: address.id,
-          address: {
-            country: selectedCountry.value?.title,
-            phone: input.value,
-            city: address.city,
-            postalCode: address.postalCode,
-            streetName: address.streetName,
-          },
-        },
-      ],
-    };
-
-    try {
-      const updateCustomer = async () => {
-        const res = await store.dispatch('customer/updateCustomer', formData);
-
-        store.commit('customer/setVersion', res.body.version);
-      };
-
-      toast.promise(
-        updateCustomer,
-        {
-          pending: 'Phone number is updating',
-          success: 'Phone number has updated 👌',
-          error: 'Something goes wrong 🤯',
-        },
-        {
-          theme: 'dark',
-          icon: '🎉',
-          transition: toast.TRANSITIONS.SLIDE,
-        },
-      );
-    } catch (error) {
-      console.log(error);
-    }
-  } else if (mode === 'cancel') {
-    isPhoneEdit.value = !isPhoneEdit.value;
-
     address.phone.number = props.address.phone;
+    address.phone.code = props.address.country;
+    address.postalCode = props.address.postalCode;
+    address.country = props.address.country;
   }
 }
 
@@ -684,6 +417,23 @@ $darkBackgroundColor: #010101;
       border-radius: 5px;
       padding: 2px;
     }
+  }
+}
+
+.address-block {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.address-button {
+  cursor: pointer;
+  transition: 0.2s;
+  &:hover {
+    opacity: 0.8;
   }
 }
 

@@ -118,6 +118,8 @@ const submitHandler = async () => {
   }
   isLoading.value = true;
   try {
+    //localStorage.clear();
+
     const res = await store.dispatch('customer/login', {
       email: formData.email,
       password: formData.password,

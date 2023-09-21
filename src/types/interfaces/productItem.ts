@@ -45,5 +45,7 @@ export interface ProductItem {
       label: string;
       url: string;
     }>;
+    id: number;
+    sku: string;
   };
 }

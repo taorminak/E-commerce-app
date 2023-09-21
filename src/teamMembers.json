@@ -1,0 +1,34 @@
+[
+    {
+      "name": "Oleg Bukhryakov",
+      "role": "Team Lead",
+      "bio": "Born in Tyumen, Russia, Oleg currently resides in the vibrant city of Bishkek, Kyrgyzstan. He recently started an internship as a frontend developer at the company LLC DataRum and devotes his time to coding and perfecting his skills.",
+      "contribution": "Oleg made a significant contribution to the project, despite facing severe time constraints. He created essential components for the web application, including a user login service, a detailed product page, and a functional shopping cart.",
+      "githubProfile": "https://github.com/Fileofish",
+      "photo": "Oleg.jpeg"
+    },
+    {
+      "name": "Ruslan Adzhigitov",
+      "role": "Frontend Developer",
+      "bio": "Ruslan is a dedicated frontend developer known for his passion for crafting visually stunning and user-friendly websites. He excels in transforming creative ideas into interactive digital realities. Currently, Ruslan is employed at Cartips, where he showcases his commitment to excellence in web development.",
+      "contribution": "Ruslan crafted login and registration forms with validation, designed user profile page, and made valuable contributions to enhancing the shopping cart feature, elevating the overall user experience.",
+      "githubProfile": "https://github.com/adzhigitovruslan",
+      "photo": "Ruslan.jpeg"
+    },
+    {
+      "name": "Anna Ostanina",
+      "role": "Frontend Developer",
+      "bio": "Originally from Kazakhstan and currently residing in Austria, Anna embarked on her frontend development journey 1.5 years ago. She is committed to continuous self-improvement and staying up-to-date with the latest trends in the world of web development.",
+      "contribution": "Anna has made significant contributions to the team's work, including implementing routing functionality and developing the main and catalog pages. Additionally, Anna created the \"About Us\" page, where she shared the team's story.",
+      "githubProfile": "https://github.com/taorminak",
+      "photo": "Anna.jpg"
+    },
+    {
+      "name": "Erlan Toktosunov",
+      "role": "Mentor",
+      "bio": "A former RS School student from several years ago, Erland is now a mentor and a member of the final task jury, giving back and guiding the next generation of aspiring developers. He is currently excelling as a frontend developer at Conundrum.",
+      "contribution": "Erlan provided invaluable assistance in the project. He willingly shared his experience and knowledge, conducting error analysis, and providing guidance to the team on rectifying issues. He was always available and eager to help.",
+      "githubProfile": "https://github.com/3igrik",
+      "photo": "Erlan.jpeg"
+    }
+  ]

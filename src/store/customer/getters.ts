@@ -11,6 +11,11 @@ const getters: GetterTree<CustomerState, GlobalState> = {
   getUser(state) {
     return state.user;
   },
+  getAddresses(state) {
+    const addressObj = [...state.user.address].reverse();
+
+    return addressObj;
+  },
   getVersion(state) {
     return state.version;
   },
