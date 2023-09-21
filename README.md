@@ -73,3 +73,7 @@ npm run lint
 ### Customize configuration
 
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+### Deploy
+
+See [Deploy link](https://e-commerce-application-eight.vercel.app/home)
